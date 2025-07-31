@@ -7,3 +7,5 @@ bytes32 constant RELAYER_ROLE = keccak256("RELAYER");
 bytes32 constant ROLES_GOVERNOR_ROLE = keccak256("ROLES_GOVERNOR"); // Sets roles
 // Other roles (may change)
 bytes32 constant METADATA_UPDATER_ROLE_PREFIX = keccak256("METADATA_UPDATER_PREFIX");
+// Math
+uint24 constant BASE_NON_NATIVE_UNIT = 10000;
