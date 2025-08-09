@@ -16,6 +16,9 @@ library AssetMath {
     /// @param basePrice Base price in token units
     /// @param currentMarketValue Market value in token units
     /// @param weights Factor weights
+    /// @param tradeVolumeFactor Trade volume factor (max = 1) with a factor of 10^4
+    /// @param areaVolumeFactor Area volume factor (max = 1) with a factor of 10^4
+    /// @param categoryMultiplierDelta Delta representing asset category with a factor of 10^4
     /// @return _marketPrice Market price in token units
     function marketPrice(
         uint256 basePrice,
@@ -28,11 +31,13 @@ library AssetMath {
         uint24 sensitivityCoefficient
     ) internal pure returns (uint256 _marketPrice) {
         require(weights.w0 + weights.w1 + weights.w2 + weights.w3 == BASE_NON_NATIVE_UNIT, "TW != 1"); // Total weights must be equal to 1.
+        require(tradeVolumeFactor <= BASE_NON_NATIVE_UNIT, "TVF");
+        require(areaVolumeFactor <= BASE_NON_NATIVE_UNIT, "AVF");
         uint256 accumWeights = weights.w0 * weights.w1 * weights.w2 * weights.w3; // Accumulated weights with a factor of 10^16
         uint256 marketValuePressureRatio = (currentMarketValue * BASE_NON_NATIVE_UNIT) / basePrice;
         uint256 factors = accumWeights *
             (tradeVolumeFactor + areaVolumeFactor + marketValuePressureRatio + categoryMultiplierDelta);
-        _marketPrice = 
+        _marketPrice =
             (basePrice * (1 + (sensitivityCoefficient * factors) + manualModifier)) /
             (manualModifier > 0 ? 1e28 : 1e24); // Divide by 10^24 to cancel out exponent of `factors` and `sensitivityCoefficient` or 10^28 if modifier is greater than 0
     }
