@@ -64,6 +64,7 @@ contract Zone is IZone, ERC721URIStorage {
         address lrShare = Clones.cloneDeterministic(lrShareImplementation, salt);
         ILRShare(lrShare).initialize(tokenId);
         ILRShare(lrShare).mint(to, appraisal);
+        shareToken[tokenId] = lrShare;
         return (tokenId, lrShare);
     }
 
