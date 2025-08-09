@@ -65,6 +65,7 @@ contract Zone is IZone, ERC721URIStorage {
         ILRShare(lrShare).initialize(tokenId);
         ILRShare(lrShare).mint(to, appraisal);
         shareToken[tokenId] = lrShare;
+        emit Mint(tokenId, lrShare, metadataURI);
         return (tokenId, lrShare);
     }
 
