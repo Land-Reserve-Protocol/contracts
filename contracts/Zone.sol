@@ -2,12 +2,18 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 import "./interfaces/IZone.sol";
 import "./interfaces/ILRShare.sol";
 import "./storage/AssetMetadataStorage.sol";
 import "./registries/RoleRegistry.sol";
 
-contract Zone is IZone, ERC721URIStorage {
+/// @title Zone
+/// @author Kingsley Victor
+/// @notice The contract representing a geographical zone
+contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
     // Share token implementation
     address public lrShareImplementation;
 
@@ -26,14 +32,14 @@ contract Zone is IZone, ERC721URIStorage {
     // Map each token ID to the representing ERC20
     mapping(uint256 => address) public shareToken;
 
-    constructor() ERC721("", "") {}
+    constructor() ERC721("", "") Modifiers() {}
 
     function initialize(
         string memory name_,
         string memory symbol_,
-        uint24 _longitude,
         uint24 _latitude,
-        RoleRegistry roleRegistry,
+        uint24 _longitude,
+        address roleRegistry,
         address storageAdmin,
         address _lrShareImplementation
     ) external {
@@ -44,8 +50,9 @@ contract Zone is IZone, ERC721URIStorage {
         _name = name_;
         _symbol = symbol_;
 
-        assetMetadataStorage = new AssetMetadataStorage(roleRegistry, storageAdmin);
+        assetMetadataStorage = new AssetMetadataStorage(RoleRegistry(roleRegistry), storageAdmin);
         lrShareImplementation = _lrShareImplementation;
+        _setRoleRegistry(RoleRegistry(roleRegistry));
     }
 
     function metadata() external view override returns (uint24 lng, uint24 lat, uint256 id) {
@@ -54,7 +61,11 @@ contract Zone is IZone, ERC721URIStorage {
         id = tokenId;
     }
 
-    function mint(address to, uint256 appraisal, string memory metadataURI) external returns (uint256, address) {
+    function mint(
+        address to,
+        uint256 appraisal,
+        string memory metadataURI
+    ) external whenNotPaused nonReentrant returns (uint256, address) {
         if (msg.sender != factory) revert OnlyFactory();
         ++tokenId;
         _safeMint(msg.sender, tokenId);
@@ -71,5 +82,11 @@ contract Zone is IZone, ERC721URIStorage {
 
     function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
         return assetMetadataStorage.tokenURI(_tokenId);
+    }
+
+    function switchPauseState() external {
+        if (msg.sender != factory) revert OnlyFactory();
+        if (paused()) _unpause();
+        else _pause();
     }
 }
