@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import {RoleRegistry} from "../registries/RoleRegistry.sol";
+import {RoleRegistry} from '../registries/RoleRegistry.sol';
 
 library Roles {
     function accountHasSingleRole(
@@ -46,7 +46,7 @@ library Roles {
         address[] memory accounts,
         bytes32[] memory roles
     ) internal view returns (bool _haveEveryRole) {
-        require(accounts.length == roles.length, "DIFF_LENGTH");
+        require(accounts.length == roles.length, 'DIFF_LENGTH');
         _haveEveryRole = true;
         for (uint i; i < accounts.length; i++) {
             bool breakOuterLoop = false;
@@ -68,7 +68,7 @@ library Roles {
         address[] memory accounts,
         bytes32[][] memory roles
     ) internal view returns (bool _hasCorrespondingRoles) {
-        require(accounts.length == roles.length, "DIFF_LENGTH");
+        require(accounts.length == roles.length, 'DIFF_LENGTH');
         _hasCorrespondingRoles = true;
         for (uint i; i < accounts.length; i++) {
             bool breakOuterLoop = false;

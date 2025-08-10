@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import "./Constants.sol";
+import './Constants.sol';
 
 library AssetMath {
     // Weights for each factor. Each value must have a factor of 10^4 (i.e human value * 10^4) to bypass Solidity's inability to handle floating point numbers
@@ -30,9 +30,9 @@ library AssetMath {
         uint24 manualModifier,
         uint24 sensitivityCoefficient
     ) internal pure returns (uint256 _marketPrice) {
-        require(weights.w0 + weights.w1 + weights.w2 + weights.w3 == BASE_NON_NATIVE_UNIT, "TW != 1"); // Total weights must be equal to 1.
-        require(tradeVolumeFactor <= BASE_NON_NATIVE_UNIT, "TVF");
-        require(areaVolumeFactor <= BASE_NON_NATIVE_UNIT, "AVF");
+        require(weights.w0 + weights.w1 + weights.w2 + weights.w3 == BASE_NON_NATIVE_UNIT, 'TW != 1'); // Total weights must be equal to 1.
+        require(tradeVolumeFactor <= BASE_NON_NATIVE_UNIT, 'TVF');
+        require(areaVolumeFactor <= BASE_NON_NATIVE_UNIT, 'AVF');
         uint256 accumWeights = weights.w0 * weights.w1 * weights.w2 * weights.w3; // Accumulated weights with a factor of 10^16
         uint256 marketValuePressureRatio = (currentMarketValue * BASE_NON_NATIVE_UNIT) / basePrice;
         uint256 factors = accumWeights *

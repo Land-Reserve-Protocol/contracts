@@ -1,14 +1,14 @@
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
+import '@openzeppelin/contracts/proxy/Clones.sol';
+import '@openzeppelin/contracts/utils/Pausable.sol';
+import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 
-import "./interfaces/IZone.sol";
-import "./interfaces/ILRShare.sol";
-import "./storage/AssetMetadataStorage.sol";
-import "./registries/RoleRegistry.sol";
+import './interfaces/IZone.sol';
+import './interfaces/ILRShare.sol';
+import './storage/AssetMetadataStorage.sol';
+import './registries/RoleRegistry.sol';
 
 /// @title Zone
 /// @author Kingsley Victor
@@ -32,7 +32,7 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
     // Map each token ID to the representing ERC20
     mapping(uint256 => address) public shareToken;
 
-    constructor() ERC721("", "") Modifiers() {}
+    constructor() ERC721('', '') Modifiers() {}
 
     function initialize(
         string memory name_,

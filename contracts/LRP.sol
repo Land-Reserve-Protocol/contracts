@@ -1,11 +1,11 @@
 pragma solidity ^0.8.28;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {Modifiers} from "./utils/Modifiers.sol";
-import {RoleRegistry} from "./registries/RoleRegistry.sol";
+import {ERC20} from '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+import {Modifiers} from './utils/Modifiers.sol';
+import {RoleRegistry} from './registries/RoleRegistry.sol';
 
 contract LRP is ERC20, Modifiers {
-    constructor(RoleRegistry roleRegistry) ERC20("Land Reserve Protocol", "LRP") Modifiers() {
+    constructor(RoleRegistry roleRegistry) ERC20('Land Reserve Protocol', 'LRP') Modifiers() {
         _setRoleRegistry(roleRegistry);
     }
 

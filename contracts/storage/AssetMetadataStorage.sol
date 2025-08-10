@@ -1,10 +1,10 @@
 pragma solidity ^0.8.0;
 
-import {Modifiers} from "../utils/Modifiers.sol";
-import {RoleRegistry} from "../registries/RoleRegistry.sol";
-import {IAssetMetadataStorage} from "../interfaces/IAssetMetadataStorage.sol";
-import {IZone} from "../interfaces/IZone.sol";
-import "../libs/Constants.sol";
+import {Modifiers} from '../utils/Modifiers.sol';
+import {RoleRegistry} from '../registries/RoleRegistry.sol';
+import {IAssetMetadataStorage} from '../interfaces/IAssetMetadataStorage.sol';
+import {IZone} from '../interfaces/IZone.sol';
+import '../libs/Constants.sol';
 
 contract AssetMetadataStorage is Modifiers, IAssetMetadataStorage {
     mapping(uint256 => string) public tokenURI;
@@ -13,7 +13,7 @@ contract AssetMetadataStorage is Modifiers, IAssetMetadataStorage {
 
     constructor(RoleRegistry roleRegistry, address storageAdmin) Modifiers() {
         METADATA_UPDATER_ROLE_SUFFIX = keccak256(
-            bytes(string(abi.encodePacked("lrp.asset.metadata.storage.role.", msg.sender)))
+            bytes(string(abi.encodePacked('lrp.asset.metadata.storage.role.', msg.sender)))
         );
         bytes32 METADATA_UPDATER = keccak256(
             abi.encodePacked(METADATA_UPDATER_ROLE_PREFIX, METADATA_UPDATER_ROLE_SUFFIX)
@@ -29,7 +29,7 @@ contract AssetMetadataStorage is Modifiers, IAssetMetadataStorage {
         string memory uri
     ) external onlyMetadataUpdater(METADATA_UPDATER_ROLE_SUFFIX) {
         uint256 zoneTokenId = IZone(zone).tokenId();
-        require(tokenId <= zoneTokenId, "TOKEN_ID");
+        require(tokenId <= zoneTokenId, 'TOKEN_ID');
         tokenURI[tokenId] = uri;
         emit TokenURIUpdated(uri);
     }

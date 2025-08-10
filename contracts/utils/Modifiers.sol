@@ -1,8 +1,8 @@
 pragma solidity ^0.8.0;
 
-import {RoleRegistry} from "../registries/RoleRegistry.sol";
-import {Roles} from "../libs/Roles.sol";
-import "../libs/Constants.sol";
+import {RoleRegistry} from '../registries/RoleRegistry.sol';
+import {Roles} from '../libs/Roles.sol';
+import '../libs/Constants.sol';
 
 abstract contract Modifiers {
     using Roles for RoleRegistry;
@@ -37,6 +37,13 @@ abstract contract Modifiers {
         bytes32 METADATA_UPDATER = keccak256(abi.encodePacked(METADATA_UPDATER_ROLE_PREFIX, suffix));
         if (!roles.accountHasSingleRole(msg.sender, METADATA_UPDATER)) {
             revert DoesNotHaveRole(msg.sender, METADATA_UPDATER);
+        }
+        _;
+    }
+
+    modifier onlyRegistryUpdater() {
+        if (!roles.accountHasSingleRole(msg.sender, REGISTRY_UPDATER_ROLE)) {
+            revert DoesNotHaveRole(msg.sender, REGISTRY_UPDATER_ROLE);
         }
         _;
     }
