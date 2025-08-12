@@ -53,6 +53,7 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
         assetMetadataStorage = new AssetMetadataStorage(RoleRegistry(roleRegistry), storageAdmin);
         lrShareImplementation = _lrShareImplementation;
         _setRoleRegistry(RoleRegistry(roleRegistry));
+        emit Initialize(name_, symbol_, _latitude, _longitude, storageAdmin);
     }
 
     function metadata() external view override returns (uint24 lng, uint24 lat, uint256 id) {

@@ -12,4 +12,5 @@ interface IZone {
     function mint(address, uint256, string memory) external returns (uint256, address);
 
     event Mint(uint256 indexed tokenId, address indexed shareToken, string metadataURI);
+    event Initialize(string name, string symbol, uint24 lat, uint24 lng, address admin);
 }
