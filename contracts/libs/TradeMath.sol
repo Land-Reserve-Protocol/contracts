@@ -20,7 +20,7 @@ library TradeMath {
 
     function smoothingFactorAlpha(uint24 raw) internal pure returns (uint24 alpha) {
         uint24 v = BASE_NON_NATIVE_UNIT - raw; // raw is always within the range of 0 - 10^4
-        alpha = raw + (v * raw);
+        alpha = raw + v * raw;
         if (v > 0) {
             alpha = alpha / BASE_NON_NATIVE_UNIT;
         }
