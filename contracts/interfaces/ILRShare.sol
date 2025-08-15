@@ -8,6 +8,7 @@ struct Observation {
     uint256 sellVolume;
     uint256 buyPrice;
     uint256 sellPrice;
+    uint24 momentum;
 }
 
 interface ILRShare {

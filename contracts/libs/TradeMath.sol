@@ -4,6 +4,8 @@ import '@openzeppelin/contracts/utils/math/Math.sol';
 import './Constants.sol';
 
 library TradeMath {
+    uint24 constant POINT_TWO = 2000; // 0.2% in basis points
+
     function rawVolumeFactor(
         uint256 volumeAtCurrentTradeIndex,
         uint256 volumeAtPreviousTradeIndex
@@ -34,5 +36,18 @@ library TradeMath {
         uint24 a = (alpha * raw) / BASE_NON_NATIVE_UNIT;
         uint24 b = (BASE_NON_NATIVE_UNIT - alpha) * uint24(volumeAtPreviousTradeIndex);
         smoothed = a + b;
+    }
+
+    function momentumFactor(
+        uint256 numberOfTrades,
+        uint256 priceAtPreviousTradeIndex,
+        uint24 momentumAtPreviousTradeIndex,
+        uint8 priceTokenDecimals
+    ) internal pure returns (uint24 momentum) {
+        uint24 alpha = (uint24(POINT_TWO * numberOfTrades) * BASE_NON_NATIVE_UNIT) / uint24(numberOfTrades + 1);
+        uint256 a = (alpha * priceAtPreviousTradeIndex) / 10 ** priceTokenDecimals;
+        uint256 b = ((BASE_NON_NATIVE_UNIT ** 2) - alpha) * momentumAtPreviousTradeIndex;
+        b = b / BASE_NON_NATIVE_UNIT; // Normalize
+        momentum = uint24(a + b) / (momentumAtPreviousTradeIndex > 0 ? 10 ** 4 : 1);
     }
 }

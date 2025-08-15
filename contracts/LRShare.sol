@@ -38,7 +38,8 @@ contract LRShare is ERC20, ILRShare {
             buyVolume: 0,
             sellVolume: 0,
             buyPrice: 0,
-            sellPrice: 0
+            sellPrice: 0,
+            momentum: 0
         });
         observations.push(initialObservation);
     }
