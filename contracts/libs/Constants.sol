@@ -15,3 +15,6 @@ uint24 constant RESIDENTIAL = 0; // 0.0
 uint24 constant COMMERCIAL = 4000; // 0.4
 uint24 constant INDUSTRIAL = 6000; //0.6 (until changes are requested)
 uint24 constant AGRICULTURAL = 1000; // 0.1
+// Other constants
+uint24 constant SENTIMENT_SENSITIVITY_COEFFICIENT = 3000; // 0.3 in basis points
+uint24 constant ZER0 = 0;

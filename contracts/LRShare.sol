@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 import {ERC20} from '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import {IERC721Metadata} from '@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol';
 import './interfaces/ILRShare.sol';
-import './libs/Constants.sol';
+import './libs/Constants.sol' as Constants;
 
 contract LRShare is ERC20, ILRShare {
     address public zone;
@@ -35,11 +35,12 @@ contract LRShare is ERC20, ILRShare {
         Observation memory initialObservation = Observation({
             trades: 0,
             currentPrice: _currentPrice,
-            buyVolume: 0,
-            sellVolume: 0,
-            buyPrice: 0,
-            sellPrice: 0,
-            momentum: 0
+            buyVolume: uint16(Constants.ZER0),
+            sellVolume: uint16(Constants.ZER0),
+            buyEpsilon: Constants.ZER0,
+            sellEpsilon: Constants.ZER0,
+            momentum: Constants.ZER0,
+            sentiment: Constants.ZER0
         });
         observations.push(initialObservation);
     }

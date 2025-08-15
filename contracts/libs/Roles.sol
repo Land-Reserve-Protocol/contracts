@@ -17,7 +17,7 @@ library Roles {
         bytes32[] memory roles
     ) internal view returns (bool _hasEveryRole) {
         _hasEveryRole = true;
-        for (uint i; i < roles.length; i++) {
+        for (uint256 i; i < roles.length; i++) {
             bytes32 role = roles[i];
             if (!roleRegistry.hasRole(role, account)) {
                 _hasEveryRole = false;
@@ -32,7 +32,7 @@ library Roles {
         bytes32 role
     ) internal view returns (bool _haveRole) {
         _haveRole = true;
-        for (uint i; i < accounts.length; i++) {
+        for (uint256 i; i < accounts.length; i++) {
             address account = accounts[i];
             if (!roleRegistry.hasRole(role, account)) {
                 _haveRole = false;
@@ -48,9 +48,9 @@ library Roles {
     ) internal view returns (bool _haveEveryRole) {
         require(accounts.length == roles.length, 'DIFF_LENGTH');
         _haveEveryRole = true;
-        for (uint i; i < accounts.length; i++) {
+        for (uint256 i; i < accounts.length; i++) {
             bool breakOuterLoop = false;
-            for (uint j; j < roles.length; j++) {
+            for (uint256 j; j < roles.length; j++) {
                 if (!roleRegistry.hasRole(roles[j], accounts[i])) {
                     _haveEveryRole = false;
                     breakOuterLoop = true;
@@ -70,10 +70,10 @@ library Roles {
     ) internal view returns (bool _hasCorrespondingRoles) {
         require(accounts.length == roles.length, 'DIFF_LENGTH');
         _hasCorrespondingRoles = true;
-        for (uint i; i < accounts.length; i++) {
+        for (uint256 i; i < accounts.length; i++) {
             bool breakOuterLoop = false;
             bytes32[] memory _roles = roles[i];
-            for (uint j; j < _roles.length; j++) {
+            for (uint256 j; j < _roles.length; j++) {
                 if (!roleRegistry.hasRole(_roles[j], accounts[i])) {
                     _hasCorrespondingRoles = false;
                     breakOuterLoop = true;

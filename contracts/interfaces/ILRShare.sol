@@ -2,13 +2,14 @@ pragma solidity ^0.8.0;
 
 // Market observation per asset
 struct Observation {
-    uint256 trades; // (Buys + Sells)
-    uint256 currentPrice;
-    uint256 buyVolume;
-    uint256 sellVolume;
-    uint256 buyPrice;
-    uint256 sellPrice;
+    uint16 trades; // (Buys + Sells)
+    uint256 currentPrice; // Unit price of the asset
+    uint16 buyVolume;
+    uint16 sellVolume;
+    uint256 buyEpsilon;
+    uint256 sellEpsilon;
     uint24 momentum;
+    uint24 sentiment;
 }
 
 interface ILRShare {
@@ -20,11 +21,13 @@ interface ILRShare {
         external
         view
         returns (
-            uint256 trades,
+            uint16 trades,
             uint256 currentPrice,
-            uint256 buyVolume,
-            uint256 sellVolume,
-            uint256 buyPrice,
-            uint256 sellPrice
+            uint16 buyVolume,
+            uint16 sellVolume,
+            uint256 buyEpsilon,
+            uint256 sellEpsilon,
+            uint24 momentum,
+            uint24 sentiment
         );
 }
