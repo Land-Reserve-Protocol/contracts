@@ -1,11 +1,19 @@
 pragma solidity ^0.8.0;
 
+// Asset type
+enum AssetType {
+    Residential,
+    Commercial,
+    Industrial,
+    Agricultural
+}
+
 // Market observation per asset
 struct Observation {
-    uint16 trades; // (Buys + Sells)
+    uint24 trades; // (Buys + Sells)
     uint256 currentPrice; // Unit price of the asset
-    uint16 buyVolume;
-    uint16 sellVolume;
+    uint24 buyVolume;
+    uint24 sellVolume;
     uint256 buyEpsilon;
     uint256 sellEpsilon;
     uint24 momentum;
@@ -13,7 +21,8 @@ struct Observation {
 }
 
 interface ILRShare {
-    function initialize(uint256) external;
+    function peggedAsset() external view returns (address);
+    function initialize(uint256, address, uint24[4] memory, AssetType) external;
     function mint(address to, uint256 amount) external;
     function observations(
         uint256 index
@@ -21,13 +30,15 @@ interface ILRShare {
         external
         view
         returns (
-            uint16 trades,
+            uint24 trades,
             uint256 currentPrice,
-            uint16 buyVolume,
-            uint16 sellVolume,
+            uint24 buyVolume,
+            uint24 sellVolume,
             uint256 buyEpsilon,
             uint256 sellEpsilon,
             uint24 momentum,
             uint24 sentiment
         );
+    function observationsLength() external view returns (uint256);
+    function lastObservationUpdateTime() external view returns (uint256);
 }

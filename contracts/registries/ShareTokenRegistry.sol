@@ -7,8 +7,7 @@ import '../interfaces/IShareTokenRegistry.sol';
 contract ShareTokenRegistry is Ownable, Modifiers, IShareTokenRegistry {
     mapping(address => bool) public isShareToken;
     mapping(address => bool) public isTradeable;
-
-    event AssetAllowed(address indexed asset, uint256 indexed assetId);
+    mapping(address => address) public zone;
 
     constructor(address newOwner) Ownable(msg.sender) {
         _transferOwnership(newOwner);
@@ -22,6 +21,12 @@ contract ShareTokenRegistry is Ownable, Modifiers, IShareTokenRegistry {
     function switchTradeability(address shareToken) external onlyRegistryUpdater {
         require(isShareToken[shareToken], 'UNKNOWN_TOKEN');
         isTradeable[shareToken] = !isTradeable[shareToken];
+    }
+
+    function setZone(address shareToken, address zoneAddress) external onlyRegistryUpdater {
+        require(isShareToken[shareToken], 'UNKNOWN_TOKEN');
+        if (zone[shareToken] != address(0)) revert AlreadyRegistered();
+        zone[shareToken] = zoneAddress;
     }
 
     function setRoleRegistry(address roleRegistry) external onlyCouncilMember {

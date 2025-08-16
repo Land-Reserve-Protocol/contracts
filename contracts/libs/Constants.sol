@@ -18,3 +18,4 @@ uint24 constant AGRICULTURAL = 1000; // 0.1
 // Other constants
 uint24 constant SENTIMENT_SENSITIVITY_COEFFICIENT = 3000; // 0.3 in basis points
 uint24 constant ZER0 = 0;
+uint256 constant DEFAULT_UPDATE_INTERVAL = 14400; // 4 hours in seconds

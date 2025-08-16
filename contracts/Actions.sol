@@ -49,11 +49,15 @@ contract Actions is Modifiers, Pausable, ReentrancyGuard, IActions {
         address zone,
         address to,
         uint256 totalShares,
-        string memory tokenURI
+        string memory tokenURI,
+        address peggedAsset,
+        uint24[4] memory factorWeights,
+        uint8 assetType
     ) external onlyCouncilMember whenNotPaused nonReentrant {
         if (!_isZone[zone]) revert UnknownZone();
-        (, address shareToken) = IZone(zone).mint(to, totalShares, tokenURI);
+        (, address shareToken) = IZone(zone).mint(to, totalShares, tokenURI, peggedAsset, factorWeights, assetType);
         IShareTokenRegistry(shareTokenRegistry).registerShareToken(shareToken);
         IShareTokenRegistry(shareTokenRegistry).switchTradeability(shareToken);
+        IShareTokenRegistry(shareTokenRegistry).setZone(shareToken, zone);
     }
 }

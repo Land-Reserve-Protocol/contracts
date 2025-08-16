@@ -32,6 +32,12 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
     // Map each token ID to the representing ERC20
     mapping(uint256 => address) public shareToken;
 
+    // Number of trades per trade index
+    uint24[] public trades;
+
+    // Share token registry
+    IShareTokenRegistry public shareTokenRegistry;
+
     constructor() ERC721('', '') Modifiers() {}
 
     function initialize(
@@ -41,7 +47,8 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
         uint24 _longitude,
         address roleRegistry,
         address storageAdmin,
-        address _lrShareImplementation
+        address _lrShareImplementation,
+        IShareTokenRegistry _shareTokenRegistry
     ) external {
         if (factory != address(0)) revert AlreadyInitialized();
         factory = msg.sender;
@@ -49,6 +56,7 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
         latitude = _latitude;
         _name = name_;
         _symbol = symbol_;
+        shareTokenRegistry = _shareTokenRegistry;
 
         assetMetadataStorage = new AssetMetadataStorage(RoleRegistry(roleRegistry), storageAdmin);
         lrShareImplementation = _lrShareImplementation;
@@ -65,7 +73,10 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
     function mint(
         address to,
         uint256 appraisal,
-        string memory metadataURI
+        string memory metadataURI,
+        address peggedAsset,
+        uint24[4] memory factorWeights,
+        uint8 assetType
     ) external whenNotPaused nonReentrant returns (uint256, address) {
         if (msg.sender != factory) revert OnlyFactory();
         ++tokenId;
@@ -74,7 +85,7 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
         // Salt
         bytes32 salt = keccak256(abi.encodePacked(address(this), block.timestamp, tokenId));
         address lrShare = Clones.cloneDeterministic(lrShareImplementation, salt);
-        ILRShare(lrShare).initialize(tokenId);
+        ILRShare(lrShare).initialize(tokenId, peggedAsset, factorWeights, AssetType(assetType));
         ILRShare(lrShare).mint(to, appraisal);
         shareToken[tokenId] = lrShare;
         emit Mint(tokenId, lrShare, metadataURI);
@@ -89,5 +100,15 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
         if (msg.sender != factory) revert OnlyFactory();
         if (paused()) _unpause();
         else _pause();
+    }
+
+    function tradesLength() public view override returns (uint256) {
+        return trades.length;
+    }
+
+    function updateTrades(bool isNewTradeIndex) external override {
+        require(shareTokenRegistry.zone(msg.sender) == address(this), 'INVALID_CALLER');
+        if (isNewTradeIndex) trades.push(0);
+        else trades[trades.length - 1] += 1;
     }
 }

@@ -7,8 +7,8 @@ library TradeMath {
     uint24 constant POINT_TWO = 2000; // 0.2% in basis points
 
     function rawVolumeFactor(
-        uint16 volumeAtCurrentTradeIndex,
-        uint16 volumeAtPreviousTradeIndex
+        uint24 volumeAtCurrentTradeIndex,
+        uint24 volumeAtPreviousTradeIndex
     ) internal pure returns (uint24 raw) {
         if (volumeAtPreviousTradeIndex == 0) {
             raw = Constants.BASE_NON_NATIVE_UNIT;
@@ -29,16 +29,16 @@ library TradeMath {
 
     function smoothedVolumeFactor(
         uint24 raw,
-        uint256 volumeAtPreviousTradeIndex
+        uint24 volumeAtPreviousTradeIndex
     ) internal pure returns (uint24 smoothed) {
         uint24 alpha = volumeSmoothingFactorAlpha(raw); // Find factor (alpha)
         uint24 a = (alpha * raw) / Constants.BASE_NON_NATIVE_UNIT;
-        uint24 b = (Constants.BASE_NON_NATIVE_UNIT - alpha) * uint24(volumeAtPreviousTradeIndex);
+        uint24 b = (Constants.BASE_NON_NATIVE_UNIT - alpha) * volumeAtPreviousTradeIndex;
         smoothed = a + b;
     }
 
     function momentumFactor(
-        uint16 numberOfTrades,
+        uint24 numberOfTrades,
         uint256 priceAtPreviousTradeIndex,
         uint24 momentumAtPreviousTradeIndex,
         uint8 priceTokenDecimals
@@ -58,8 +58,8 @@ library TradeMath {
         uint24 k,
         uint256 buyEpsilon,
         uint256 sellEpsilon,
-        uint16 buyVolume,
-        uint16 sellVolume
+        uint24 buyVolume,
+        uint24 sellVolume
     ) internal pure returns (uint24 sentiment) {
         if (k == 0) {
             k = Constants.SENTIMENT_SENSITIVITY_COEFFICIENT; // Default to 0.3 if not specified
