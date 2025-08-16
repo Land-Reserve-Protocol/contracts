@@ -1,6 +1,7 @@
 pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/proxy/Clones.sol';
 import '@openzeppelin/contracts/utils/Pausable.sol';
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
@@ -16,6 +17,9 @@ import './registries/RoleRegistry.sol';
 contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
     // Share token implementation
     address public lrShareImplementation;
+
+    // Market place address
+    address public marketplace;
 
     uint256 public tokenId;
     address public factory;
@@ -92,6 +96,17 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
         return (tokenId, lrShare);
     }
 
+    function burn(uint256 _tokenId) external override whenNotPaused nonReentrant returns (address shareTokenAddress) {
+        if (msg.sender != factory) revert OnlyFactory();
+        shareTokenAddress = shareToken[_tokenId];
+        require(shareTokenAddress != address(0), 'SHARE_TOKEN_NOT_FOUND');
+        uint256 burnAmount = IERC20(shareTokenAddress).balanceOf(address(this));
+        _burn(_tokenId);
+        delete shareToken[_tokenId];
+        assetMetadataStorage.setTokenURI(_tokenId, ''); // Clear metadata
+        ILRShare(shareTokenAddress).burn(burnAmount); // Burn the share token
+    }
+
     function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
         return assetMetadataStorage.tokenURI(_tokenId);
     }
@@ -106,9 +121,19 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
         return trades.length;
     }
 
+    function exists(uint256 _tokenId) external view override returns (bool _exists) {
+        address tokenOwner = _ownerOf(_tokenId);
+        _exists = tokenOwner != address(0);
+    }
+
     function updateTrades(bool isNewTradeIndex) external override {
         require(shareTokenRegistry.zone(msg.sender) == address(this), 'INVALID_CALLER');
         if (isNewTradeIndex) trades.push(0);
         else trades[trades.length - 1] += 1;
+    }
+
+    function setMarketplace(address _marketplace) external override {
+        if (msg.sender != factory) revert OnlyFactory();
+        marketplace = _marketplace;
     }
 }

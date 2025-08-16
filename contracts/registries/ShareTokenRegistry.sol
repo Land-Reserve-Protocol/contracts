@@ -18,6 +18,11 @@ contract ShareTokenRegistry is Ownable, Modifiers, IShareTokenRegistry {
         isShareToken[shareToken] = true;
     }
 
+    function unregisterShareToken(address shareToken) external onlyRegistryUpdater {
+        if (!isShareToken[shareToken]) revert NotRegistered();
+        isShareToken[shareToken] = false;
+    }
+
     function switchTradeability(address shareToken) external onlyRegistryUpdater {
         require(isShareToken[shareToken], 'UNKNOWN_TOKEN');
         isTradeable[shareToken] = !isTradeable[shareToken];
@@ -25,7 +30,7 @@ contract ShareTokenRegistry is Ownable, Modifiers, IShareTokenRegistry {
 
     function setZone(address shareToken, address zoneAddress) external onlyRegistryUpdater {
         require(isShareToken[shareToken], 'UNKNOWN_TOKEN');
-        if (zone[shareToken] != address(0)) revert AlreadyRegistered();
+        if (zone[shareToken] != address(0) && zoneAddress != address(0)) revert AlreadyRegistered();
         zone[shareToken] = zoneAddress;
     }
 

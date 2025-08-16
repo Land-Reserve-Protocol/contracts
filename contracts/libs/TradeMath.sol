@@ -65,8 +65,8 @@ library TradeMath {
             k = Constants.SENTIMENT_SENSITIVITY_COEFFICIENT; // Default to 0.3 if not specified
         }
 
-        uint256 buys = (buyEpsilon * Constants.BASE_NON_NATIVE_UNIT) / buyVolume;
-        uint256 sells = (sellEpsilon * Constants.BASE_NON_NATIVE_UNIT) / sellVolume;
+        uint256 buys = buyEpsilon / buyVolume;
+        uint256 sells = sellEpsilon / sellVolume;
 
         uint256 delta = buys > sells ? buys - sells : sells - buys; // We need the absolute difference
         uint256 sum = buys + sells;

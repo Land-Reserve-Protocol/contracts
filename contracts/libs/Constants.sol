@@ -10,6 +10,7 @@ bytes32 constant REGISTRY_UPDATER_ROLE = keccak256('REGISTRY_UPDATER');
 bytes32 constant METADATA_UPDATER_ROLE_PREFIX = keccak256('METADATA_UPDATER_PREFIX');
 // Math
 uint24 constant BASE_NON_NATIVE_UNIT = 10000;
+uint256 constant BASE_DECIMALS = 18;
 // Category multiplier deltas
 uint24 constant RESIDENTIAL = 0; // 0.0
 uint24 constant COMMERCIAL = 4000; // 0.4

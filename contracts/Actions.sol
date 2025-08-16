@@ -14,6 +14,7 @@ contract Actions is Modifiers, Pausable, ReentrancyGuard, IActions {
     address public immutable zoneImplementation;
     address public immutable lrShareImplementation;
     address public immutable shareTokenRegistry;
+    address public immutable marketplace;
 
     mapping(address => bool) private _isZone;
 
@@ -23,11 +24,13 @@ contract Actions is Modifiers, Pausable, ReentrancyGuard, IActions {
         address _zoneImplementation,
         address _lrShareImplementation,
         RoleRegistry roleRegistry,
-        address _shareTokenRegistry
+        address _shareTokenRegistry,
+        address _marketplace
     ) Modifiers() {
         zoneImplementation = _zoneImplementation;
         lrShareImplementation = _lrShareImplementation;
         shareTokenRegistry = _shareTokenRegistry;
+        marketplace = _marketplace;
         _setRoleRegistry(roleRegistry);
     }
 
@@ -41,7 +44,17 @@ contract Actions is Modifiers, Pausable, ReentrancyGuard, IActions {
         bytes32 salt = keccak256(abi.encodePacked(name, symbol, lat, lng));
         zone = Clones.cloneDeterministic(zoneImplementation, salt);
         emit NewZone(zone, name, symbol, lat, lng, admin);
-        IZone(zone).initialize(name, symbol, lat, lng, address(roles), admin, lrShareImplementation);
+        IZone(zone).initialize(
+            name,
+            symbol,
+            lat,
+            lng,
+            address(roles),
+            admin,
+            lrShareImplementation,
+            IShareTokenRegistry(shareTokenRegistry)
+        );
+        IZone(zone).setMarketplace(marketplace);
         _isZone[zone] = true;
     }
 
@@ -59,5 +72,14 @@ contract Actions is Modifiers, Pausable, ReentrancyGuard, IActions {
         IShareTokenRegistry(shareTokenRegistry).registerShareToken(shareToken);
         IShareTokenRegistry(shareTokenRegistry).switchTradeability(shareToken);
         IShareTokenRegistry(shareTokenRegistry).setZone(shareToken, zone);
+    }
+
+    function burnWithinZone(address zone, uint256 tokenId) external onlyCouncilMember whenNotPaused nonReentrant {
+        if (!_isZone[zone]) revert UnknownZone();
+        address shareToken = IZone(zone).burn(tokenId);
+        if (IShareTokenRegistry(shareTokenRegistry).isTradeable(shareToken))
+            IShareTokenRegistry(shareTokenRegistry).switchTradeability(shareToken);
+        IShareTokenRegistry(shareTokenRegistry).setZone(shareToken, address(0));
+        IShareTokenRegistry(shareTokenRegistry).unregisterShareToken(shareToken);
     }
 }

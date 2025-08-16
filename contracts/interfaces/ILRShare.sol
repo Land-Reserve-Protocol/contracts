@@ -22,8 +22,11 @@ struct Observation {
 
 interface ILRShare {
     function peggedAsset() external view returns (address);
+    function peggedAssetDecimals() external view returns (uint8);
     function initialize(uint256, address, uint24[4] memory, AssetType) external;
     function mint(address to, uint256 amount) external;
+    function burn(uint256 amount) external;
+    function updateMarketFactors(uint24 buyVolume, uint24 sellVolume, uint256 buyPrice, uint256 sellPrice) external;
     function observations(
         uint256 index
     )

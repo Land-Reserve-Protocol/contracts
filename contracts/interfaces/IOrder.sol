@@ -8,7 +8,16 @@ enum OrderType {
 interface IOrder {
     error AlreadyInitialized();
 
-    function initialize(OrderType orderType, uint256 amount, address account, address lrShare) external;
+    function initialize(
+        OrderType orderType,
+        uint256 unitAmount,
+        uint24 volume,
+        address account,
+        address shareToken
+    ) external;
     function fulfill() external;
     function fulfilled() external view returns (bool);
+    function shareToken() external view returns (address);
+
+    event Fulfilled(uint256 indexed timestamp);
 }

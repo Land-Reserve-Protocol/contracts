@@ -28,8 +28,8 @@ contract AssetMetadataStorage is Modifiers, IAssetMetadataStorage {
         uint256 tokenId,
         string memory uri
     ) external onlyMetadataUpdater(METADATA_UPDATER_ROLE_SUFFIX) {
-        uint256 zoneTokenId = IZone(zone).tokenId();
-        require(tokenId <= zoneTokenId, 'TOKEN_ID');
+        require(tokenId <= IZone(zone).tokenId(), 'TOKEN_ID');
+        require(IZone(zone).exists(tokenId), 'TOKEN_DOES_NOT_EXIST');
         tokenURI[tokenId] = uri;
         emit TokenURIUpdated(uri);
     }

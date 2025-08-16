@@ -94,6 +94,7 @@ contract LRShare is ERC20, ILRShare {
     function updateMarketFactors(uint24 buyVolume, uint24 sellVolume, uint256 buyPrice, uint256 sellPrice) external {
         // Zone
         IZone iZone = IZone(zone);
+        // TO DO: Add caller check to ensure that this can only be called by an order contract or a node
         // Area volume factors
         uint256 tradesLength = iZone.tradesLength();
         uint24 lastTrades = iZone.trades(tradesLength - 1);
@@ -104,58 +105,62 @@ contract LRShare is ERC20, ILRShare {
         // Get the last observation
         Observation storage lastObservation = observations[observations.length - 1];
 
-        lastObservation.trades += 1;
-        lastObservation.buyVolume += buyVolume;
-        lastObservation.sellVolume += sellVolume;
-        lastObservation.buyEpsilon += buyPrice * buyVolume;
-        lastObservation.sellEpsilon += sellPrice * sellVolume;
+        {
+            lastObservation.trades += 1;
+            lastObservation.buyVolume += buyVolume;
+            lastObservation.sellVolume += sellVolume;
+            lastObservation.buyEpsilon += buyPrice * buyVolume;
+            lastObservation.sellEpsilon += sellPrice * sellVolume;
+        }
 
-        // Get observation two indices back
-        Observation memory previousObservation = observations.length > 1
-            ? observations[observations.length - 2]
-            : lastObservation;
+        {
+            // Get observation two indices back
+            Observation memory previousObservation = observations.length > 1
+                ? observations[observations.length - 2]
+                : lastObservation;
 
-        lastObservation.momentum = TradeMath.momentumFactor(
-            lastObservation.trades,
-            previousObservation.currentPrice,
-            previousObservation.momentum,
-            peggedAssetDecimals
-        );
+            lastObservation.momentum = TradeMath.momentumFactor(
+                lastObservation.trades,
+                previousObservation.currentPrice,
+                previousObservation.momentum,
+                peggedAssetDecimals
+            );
 
-        // Find sentiments
-        uint24 rawSentiment = TradeMath.rawSentiment(
-            Constants.SENTIMENT_SENSITIVITY_COEFFICIENT,
-            lastObservation.buyEpsilon,
-            lastObservation.sellEpsilon,
-            lastObservation.buyVolume,
-            lastObservation.sellVolume
-        );
-        uint24 sentimentAlpha = TradeMath.sentimentSmoothingFactorAlpha(
-            rawSentiment,
-            0,
-            Constants.BASE_NON_NATIVE_UNIT
-        );
-        // Normalize sentiment
-        lastObservation.sentiment = TradeMath.smoothedSentiment(
-            sentimentAlpha,
-            rawSentiment,
-            previousObservation.sentiment
-        );
-        // Token volume factors
-        uint24 tokenRawVolumeFactor = TradeMath.rawVolumeFactor(lastObservation.trades, previousObservation.trades);
-        uint24 tokenSmoothedVolumeFactor = TradeMath.smoothedVolumeFactor(
-            tokenRawVolumeFactor,
-            previousObservation.trades
-        );
+            // Find sentiments
+            uint24 rawSentiment = TradeMath.rawSentiment(
+                Constants.SENTIMENT_SENSITIVITY_COEFFICIENT,
+                lastObservation.buyEpsilon,
+                lastObservation.sellEpsilon,
+                lastObservation.buyVolume,
+                lastObservation.sellVolume
+            );
+            uint24 sentimentAlpha = TradeMath.sentimentSmoothingFactorAlpha(
+                rawSentiment,
+                0,
+                Constants.BASE_NON_NATIVE_UNIT
+            );
+            // Normalize sentiment
+            lastObservation.sentiment = TradeMath.smoothedSentiment(
+                sentimentAlpha,
+                rawSentiment,
+                previousObservation.sentiment
+            );
+            // Token volume factors
+            uint24 tokenRawVolumeFactor = TradeMath.rawVolumeFactor(lastObservation.trades, previousObservation.trades);
+            uint24 tokenSmoothedVolumeFactor = TradeMath.smoothedVolumeFactor(
+                tokenRawVolumeFactor,
+                previousObservation.trades
+            );
 
-        // Update the current price
-        lastObservation.currentPrice = _findPrice(
-            previousObservation.currentPrice,
-            tokenSmoothedVolumeFactor,
-            areaSmoothedVolumeFactor,
-            lastObservation.momentum,
-            lastObservation.sentiment
-        );
+            // Update the current price
+            lastObservation.currentPrice = _findPrice(
+                previousObservation.currentPrice,
+                tokenSmoothedVolumeFactor,
+                areaSmoothedVolumeFactor,
+                lastObservation.momentum,
+                lastObservation.sentiment
+            );
+        }
 
         iZone.updateTrades(false); // Update zone trade count
 
@@ -182,6 +187,12 @@ contract LRShare is ERC20, ILRShare {
         require(totalSupply() == 0, 'ALREADY_MINTED');
         require(msg.sender == zone, 'ONLY_ZONE_CAN_MINT');
         _mint(to, amount);
+    }
+
+    function burn(uint256 amount) external {
+        require(msg.sender == zone, 'ONLY_ZONE_CAN_BURN');
+        require(amount == totalSupply(), 'BURN_AMOUNT_MISMATCH');
+        _burn(msg.sender, amount);
     }
 
     function observationsLength() external view override returns (uint256) {
