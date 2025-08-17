@@ -4,6 +4,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './interfaces/IOrder.sol';
 import './interfaces/ILRShare.sol';
+import './interfaces/IMarketplace.sol';
 import './libs/Constants.sol' as Constants;
 
 contract Order is IOrder {
@@ -65,7 +66,29 @@ contract Order is IOrder {
             if (remaining > 0) IERC20(shareToken).safeTransfer(account, remaining);
         } else revert('INVALID_ORDER_TYPE');
 
+        IMarketplace(factory).fulfillOrder();
+
         fulfilled = true;
         emit Fulfilled(block.timestamp);
+    }
+
+    function cancel() external override {
+        require(!fulfilled, 'ALREADY_FULFILLED');
+        require(msg.sender == account, 'CANNOT_CANCEL_OTHERS_ORDER');
+        address token = ILRShare(shareToken).peggedAsset();
+        shareToken = address(0); // Clear share token
+        if (orderType == OrderType.BUY) {
+            // Send back token to the buyer
+            uint256 balance = IERC20(token).balanceOf(address(this));
+            if (balance > 0) IERC20(token).safeTransfer(account, balance);
+        } else if (orderType == OrderType.SELL) {
+            uint256 balance = IERC20(shareToken).balanceOf(address(this));
+            if (balance > 0) IERC20(shareToken).safeTransfer(account, balance);
+        } else revert('INVALID_ORDER_TYPE');
+
+        IMarketplace(factory).cancelOrder();
+
+        fulfilled = true;
+        emit Cancelled(block.timestamp);
     }
 }
