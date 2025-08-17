@@ -48,7 +48,7 @@ contract Order is IOrder {
             // Transfer asset token to the seller
             IERC20(token).safeTransfer(msg.sender, amount);
             // Update market factor for share token
-            ILRShare(shareToken).updateMarketFactors(volume, Constants.ZER0, unitAmount, Constants.ZERO);
+            ILRShare(shareToken).updateMarketFactors(volume, Constants.ZERO, unitAmount, Constants.ZERO);
             // Send back the remaining token to the buyer
             uint256 remaining = IERC20(token).balanceOf(address(this));
             if (remaining > 0) IERC20(token).safeTransfer(account, remaining);
@@ -60,7 +60,7 @@ contract Order is IOrder {
             uint256 amount = (unitAmount * transferable) / 10 ** Constants.BASE_DECIMALS; // Normalize to token decimals
             IERC20(token).safeTransferFrom(msg.sender, account, amount);
             // Update market factor for share token
-            IERC20(shareToken).updateMarketFactors(Constants.ZERO, volume, Constants.ZER0, unitAmount);
+            ILRShare(shareToken).updateMarketFactors(Constants.ZERO, volume, Constants.ZERO, unitAmount);
             // Send back the remaining shares to the seller
             uint256 remaining = IERC20(shareToken).balanceOf(address(this));
             if (remaining > 0) IERC20(shareToken).safeTransfer(account, remaining);

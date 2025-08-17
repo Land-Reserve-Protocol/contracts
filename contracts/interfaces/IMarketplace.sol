@@ -8,6 +8,8 @@ enum OrderStatus {
 
 interface IMarketplace {
     error InvalidOrderType();
+    error UnknownShareToken();
+    error NonTradeableShareToken();
 
     function createOrder(
         address shareToken,
@@ -19,6 +21,8 @@ interface IMarketplace {
     function fulfillOrder() external;
     function status(address) external view returns (OrderStatus);
     function orders(uint256) external view returns (address);
+    function ordersLength() external view returns (uint256);
+    function shareTokenForOrder(address) external view returns (address);
 
     event OrderCreated(
         address indexed orderId,

@@ -8,6 +8,7 @@ import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './interfaces/IMarketplace.sol';
 import './interfaces/IOrder.sol';
 import './interfaces/ILRShare.sol';
+import './interfaces/IShareTokenRegistry.sol';
 import './utils/Modifiers.sol';
 import './registries/RoleRegistry.sol';
 import './libs/Constants.sol' as Constants;
@@ -16,13 +17,16 @@ contract MarketPlace is Modifiers, IMarketplace, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     address public immutable orderImplementation;
+    address public immutable shareTokenRegistry;
     address[] public orders;
 
     mapping(address => OrderStatus) public status;
+    mapping(address => address) public shareTokenForOrder;
     mapping(address => bool) private _isOrder;
 
-    constructor(address _orderImplementation, RoleRegistry roleRegistry) Modifiers() {
+    constructor(address _orderImplementation, RoleRegistry roleRegistry, address _shareTokenRegistry) Modifiers() {
         orderImplementation = _orderImplementation;
+        shareTokenRegistry = _shareTokenRegistry;
         _setRoleRegistry(roleRegistry);
     }
 
@@ -32,6 +36,8 @@ contract MarketPlace is Modifiers, IMarketplace, ReentrancyGuard, Pausable {
         uint24 volume,
         uint256 unitAmount
     ) external whenNotPaused nonReentrant returns (address orderId) {
+        if (!IShareTokenRegistry(shareTokenRegistry).isShareToken(shareToken)) revert UnknownShareToken();
+        if (!IShareTokenRegistry(shareTokenRegistry).isTradeable(shareToken)) revert NonTradeableShareToken();
         bytes32 salt = keccak256(abi.encodePacked(shareToken, orderType, block.timestamp));
         orderId = Clones.cloneDeterministic(orderImplementation, salt);
 
@@ -48,6 +54,7 @@ contract MarketPlace is Modifiers, IMarketplace, ReentrancyGuard, Pausable {
         } else revert InvalidOrderType();
 
         _isOrder[orderId] = true;
+        shareTokenForOrder[orderId] = shareToken;
         status[orderId] = OrderStatus.PENDING;
         orders.push(orderId);
         emit OrderCreated(orderId, orderType, volume, shareToken, unitAmount);
@@ -61,5 +68,14 @@ contract MarketPlace is Modifiers, IMarketplace, ReentrancyGuard, Pausable {
     function cancelOrder() external {
         require(_isOrder[msg.sender], 'INVALID_CALLER');
         status[msg.sender] = OrderStatus.CANCELLED;
+    }
+
+    function switchPauseState() external onlyCouncilMember {
+        if (paused()) _unpause();
+        else _pause();
+    }
+
+    function ordersLength() external view returns (uint256) {
+        return orders.length;
     }
 }

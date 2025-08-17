@@ -4,6 +4,7 @@ import {ERC20} from '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import {IERC721Metadata} from '@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol';
 import './interfaces/ILRShare.sol';
 import './interfaces/IZone.sol';
+import './interfaces/IMarketplace.sol';
 import './libs/Constants.sol' as Constants;
 import {TradeMath} from './libs/TradeMath.sol';
 
@@ -61,14 +62,14 @@ contract LRShare is ERC20, ILRShare {
 
         // Initial observation
         Observation memory initialObservation = Observation({
-            trades: Constants.ZER0,
+            trades: Constants.ZERO,
             currentPrice: _currentPrice,
-            buyVolume: Constants.ZER0,
-            sellVolume: Constants.ZER0,
-            buyEpsilon: Constants.ZER0,
-            sellEpsilon: Constants.ZER0,
-            momentum: Constants.ZER0,
-            sentiment: Constants.ZER0
+            buyVolume: Constants.ZERO,
+            sellVolume: Constants.ZERO,
+            buyEpsilon: Constants.ZERO,
+            sellEpsilon: Constants.ZERO,
+            momentum: Constants.ZERO,
+            sentiment: Constants.ZERO
         });
         observations.push(initialObservation);
     }
@@ -94,7 +95,7 @@ contract LRShare is ERC20, ILRShare {
     function updateMarketFactors(uint24 buyVolume, uint24 sellVolume, uint256 buyPrice, uint256 sellPrice) external {
         // Zone
         IZone iZone = IZone(zone);
-        // TO DO: Add caller check to ensure that this can only be called by an order contract or a node
+        require(IMarketplace(iZone.marketplace()).shareTokenForOrder(msg.sender) == address(this), 'INVALID_CALLER');
         // Area volume factors
         uint256 tradesLength = iZone.tradesLength();
         uint24 lastTrades = iZone.trades(tradesLength - 1);
@@ -136,7 +137,7 @@ contract LRShare is ERC20, ILRShare {
             );
             uint24 sentimentAlpha = TradeMath.sentimentSmoothingFactorAlpha(
                 rawSentiment,
-                0,
+                Constants.ZERO,
                 Constants.BASE_NON_NATIVE_UNIT
             );
             // Normalize sentiment
@@ -168,14 +169,14 @@ contract LRShare is ERC20, ILRShare {
         // If the update interval has been reached, create a new observation
         if (updateDiff >= Constants.DEFAULT_UPDATE_INTERVAL) {
             Observation memory newObservation = Observation({
-                trades: Constants.ZER0,
+                trades: Constants.ZERO,
                 currentPrice: lastObservation.currentPrice,
-                buyVolume: Constants.ZER0,
-                sellVolume: Constants.ZER0,
-                buyEpsilon: Constants.ZER0,
-                sellEpsilon: Constants.ZER0,
-                momentum: Constants.ZER0,
-                sentiment: Constants.ZER0
+                buyVolume: Constants.ZERO,
+                sellVolume: Constants.ZERO,
+                buyEpsilon: Constants.ZERO,
+                sellEpsilon: Constants.ZERO,
+                momentum: Constants.ZERO,
+                sentiment: Constants.ZERO
             });
             observations.push(newObservation);
             lastObservationUpdateTime = block.timestamp;

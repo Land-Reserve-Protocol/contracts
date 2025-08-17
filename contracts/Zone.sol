@@ -14,7 +14,7 @@ import './registries/RoleRegistry.sol';
 /// @title Zone
 /// @author Kingsley Victor
 /// @notice The contract representing a geographical zone
-contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
+contract Zone is IZone, ERC721URIStorage, Pausable, ReentrancyGuard {
     // Share token implementation
     address public lrShareImplementation;
 
@@ -42,15 +42,13 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
     // Share token registry
     IShareTokenRegistry public shareTokenRegistry;
 
-    constructor() ERC721('', '') Modifiers() {}
+    constructor() ERC721('', '') {}
 
     function initialize(
         string memory name_,
         string memory symbol_,
         uint24 _latitude,
         uint24 _longitude,
-        address roleRegistry,
-        address storageAdmin,
         address _lrShareImplementation,
         IShareTokenRegistry _shareTokenRegistry
     ) external {
@@ -62,10 +60,9 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
         _symbol = symbol_;
         shareTokenRegistry = _shareTokenRegistry;
 
-        assetMetadataStorage = new AssetMetadataStorage(RoleRegistry(roleRegistry), storageAdmin);
+        assetMetadataStorage = new AssetMetadataStorage();
         lrShareImplementation = _lrShareImplementation;
-        _setRoleRegistry(RoleRegistry(roleRegistry));
-        emit Initialize(name_, symbol_, _latitude, _longitude, storageAdmin);
+        emit Initialize(name_, symbol_, _latitude, _longitude);
     }
 
     function metadata() external view override returns (uint24 lng, uint24 lat, uint256 id) {
