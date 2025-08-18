@@ -4,6 +4,7 @@ import {ERC20} from '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import {IERC721Metadata} from '@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol';
 import './interfaces/ILRShare.sol';
 import './interfaces/IZone.sol';
+import './interfaces/IMarketplace.sol';
 import './libs/Constants.sol' as Constants;
 import {TradeMath} from './libs/TradeMath.sol';
 
@@ -19,15 +20,15 @@ contract LRShare is ERC20, ILRShare {
     Observation[] public observations;
 
     uint8 public peggedAssetDecimals;
-    uint24[4] public factorWeights;
-    uint24 public categoryMultiplierDelta;
+    uint64[4] public factorWeights;
+    uint64 public categoryMultiplierDelta;
 
     constructor() ERC20('', '') {}
 
     function initialize(
         uint256 _assetId,
         address _peggedAsset,
-        uint24[4] memory _factorWeights,
+        uint64[4] memory _factorWeights,
         AssetType assetType
     ) external {
         require(zone == address(0), 'ALREADY_INITIALIZED');
@@ -42,6 +43,7 @@ contract LRShare is ERC20, ILRShare {
         zone = msg.sender;
         assetId = _assetId;
         peggedAsset = _peggedAsset;
+        factorWeights = _factorWeights;
 
         if (assetType == AssetType.Residential) categoryMultiplierDelta = Constants.RESIDENTIAL;
         else if (assetType == AssetType.Commercial) categoryMultiplierDelta = Constants.COMMERCIAL;
@@ -61,24 +63,25 @@ contract LRShare is ERC20, ILRShare {
 
         // Initial observation
         Observation memory initialObservation = Observation({
-            trades: Constants.ZER0,
+            trades: Constants.ZERO,
             currentPrice: _currentPrice,
-            buyVolume: Constants.ZER0,
-            sellVolume: Constants.ZER0,
-            buyEpsilon: Constants.ZER0,
-            sellEpsilon: Constants.ZER0,
-            momentum: Constants.ZER0,
-            sentiment: Constants.ZER0
+            buyVolume: Constants.ZERO,
+            sellVolume: Constants.ZERO,
+            buyEpsilon: Constants.ZERO,
+            sellEpsilon: Constants.ZERO,
+            momentum: Constants.ZERO,
+            sentiment: Constants.ZERO
         });
         observations.push(initialObservation);
+        lastObservationUpdateTime = block.timestamp;
     }
 
     function _findPrice(
         uint256 basePrice,
-        uint24 tokenTradeVolumeFactor,
-        uint24 areaTradeVolumeFactor,
-        uint24 momentum,
-        uint24 sentiment
+        uint64 tokenTradeVolumeFactor,
+        uint64 areaTradeVolumeFactor,
+        uint64 momentum,
+        uint64 sentiment
     ) private view returns (uint256 price) {
         uint256 weighted = (factorWeights[0] * tokenTradeVolumeFactor) +
             (factorWeights[1] * areaTradeVolumeFactor) +
@@ -91,16 +94,16 @@ contract LRShare is ERC20, ILRShare {
         price = price / (weighted > 0 ? Constants.BASE_NON_NATIVE_UNIT ** 4 : Constants.BASE_NON_NATIVE_UNIT ** 3); // Normalize the price
     }
 
-    function updateMarketFactors(uint24 buyVolume, uint24 sellVolume, uint256 buyPrice, uint256 sellPrice) external {
+    function updateMarketFactors(uint64 buyVolume, uint64 sellVolume, uint256 buyPrice, uint256 sellPrice) external {
         // Zone
         IZone iZone = IZone(zone);
-        // TO DO: Add caller check to ensure that this can only be called by an order contract or a node
+        require(IMarketplace(iZone.marketplace()).shareTokenForOrder(msg.sender) == address(this), 'INVALID_CALLER');
         // Area volume factors
         uint256 tradesLength = iZone.tradesLength();
-        uint24 lastTrades = iZone.trades(tradesLength - 1);
-        uint24 previousTrades = tradesLength > 1 ? iZone.trades(tradesLength - 2) : lastTrades;
-        uint24 areaRawVolumeFactor = TradeMath.rawVolumeFactor(lastTrades, previousTrades);
-        uint24 areaSmoothedVolumeFactor = TradeMath.smoothedVolumeFactor(areaRawVolumeFactor, previousTrades);
+        uint64 lastTrades = iZone.trades(tradesLength - 1);
+        uint64 previousTrades = tradesLength > 1 ? iZone.trades(tradesLength - 2) : lastTrades;
+        uint64 areaRawVolumeFactor = TradeMath.rawVolumeFactor(lastTrades, previousTrades);
+        uint64 areaSmoothedVolumeFactor = TradeMath.smoothedVolumeFactor(areaRawVolumeFactor, previousTrades);
 
         // Get the last observation
         Observation storage lastObservation = observations[observations.length - 1];
@@ -127,16 +130,16 @@ contract LRShare is ERC20, ILRShare {
             );
 
             // Find sentiments
-            uint24 rawSentiment = TradeMath.rawSentiment(
+            uint64 rawSentiment = TradeMath.rawSentiment(
                 Constants.SENTIMENT_SENSITIVITY_COEFFICIENT,
                 lastObservation.buyEpsilon,
                 lastObservation.sellEpsilon,
                 lastObservation.buyVolume,
                 lastObservation.sellVolume
             );
-            uint24 sentimentAlpha = TradeMath.sentimentSmoothingFactorAlpha(
+            uint64 sentimentAlpha = TradeMath.sentimentSmoothingFactorAlpha(
                 rawSentiment,
-                0,
+                Constants.ZERO,
                 Constants.BASE_NON_NATIVE_UNIT
             );
             // Normalize sentiment
@@ -146,8 +149,8 @@ contract LRShare is ERC20, ILRShare {
                 previousObservation.sentiment
             );
             // Token volume factors
-            uint24 tokenRawVolumeFactor = TradeMath.rawVolumeFactor(lastObservation.trades, previousObservation.trades);
-            uint24 tokenSmoothedVolumeFactor = TradeMath.smoothedVolumeFactor(
+            uint64 tokenRawVolumeFactor = TradeMath.rawVolumeFactor(lastObservation.trades, previousObservation.trades);
+            uint64 tokenSmoothedVolumeFactor = TradeMath.smoothedVolumeFactor(
                 tokenRawVolumeFactor,
                 previousObservation.trades
             );
@@ -168,14 +171,14 @@ contract LRShare is ERC20, ILRShare {
         // If the update interval has been reached, create a new observation
         if (updateDiff >= Constants.DEFAULT_UPDATE_INTERVAL) {
             Observation memory newObservation = Observation({
-                trades: Constants.ZER0,
+                trades: Constants.ZERO,
                 currentPrice: lastObservation.currentPrice,
-                buyVolume: Constants.ZER0,
-                sellVolume: Constants.ZER0,
-                buyEpsilon: Constants.ZER0,
-                sellEpsilon: Constants.ZER0,
-                momentum: Constants.ZER0,
-                sentiment: Constants.ZER0
+                buyVolume: Constants.ZERO,
+                sellVolume: Constants.ZERO,
+                buyEpsilon: Constants.ZERO,
+                sellEpsilon: Constants.ZERO,
+                momentum: Constants.ZERO,
+                sentiment: Constants.ZERO
             });
             observations.push(newObservation);
             lastObservationUpdateTime = block.timestamp;

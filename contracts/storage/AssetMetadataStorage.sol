@@ -1,33 +1,20 @@
 pragma solidity ^0.8.0;
 
-import {Modifiers} from '../utils/Modifiers.sol';
 import {RoleRegistry} from '../registries/RoleRegistry.sol';
 import {IAssetMetadataStorage} from '../interfaces/IAssetMetadataStorage.sol';
 import {IZone} from '../interfaces/IZone.sol';
 import '../libs/Constants.sol';
 
-contract AssetMetadataStorage is Modifiers, IAssetMetadataStorage {
+contract AssetMetadataStorage is IAssetMetadataStorage {
     mapping(uint256 => string) public tokenURI;
-    bytes32 public immutable METADATA_UPDATER_ROLE_SUFFIX;
     address public immutable zone;
 
-    constructor(RoleRegistry roleRegistry, address storageAdmin) Modifiers() {
-        METADATA_UPDATER_ROLE_SUFFIX = keccak256(
-            bytes(string(abi.encodePacked('lrp.asset.metadata.storage.role.', msg.sender)))
-        );
-        bytes32 METADATA_UPDATER = keccak256(
-            abi.encodePacked(METADATA_UPDATER_ROLE_PREFIX, METADATA_UPDATER_ROLE_SUFFIX)
-        );
-        roleRegistry.grantRole(METADATA_UPDATER, storageAdmin);
-        roleRegistry.grantRole(METADATA_UPDATER, msg.sender);
+    constructor() {
         zone = msg.sender; // Deployer must be geo-zone contract
-        _setRoleRegistry(roleRegistry);
     }
 
-    function setTokenURI(
-        uint256 tokenId,
-        string memory uri
-    ) external onlyMetadataUpdater(METADATA_UPDATER_ROLE_SUFFIX) {
+    function setTokenURI(uint256 tokenId, string memory uri) external {
+        if (msg.sender != zone) revert OnlyZone();
         require(tokenId <= IZone(zone).tokenId(), 'TOKEN_ID');
         require(IZone(zone).exists(tokenId), 'TOKEN_DOES_NOT_EXIST');
         tokenURI[tokenId] = uri;

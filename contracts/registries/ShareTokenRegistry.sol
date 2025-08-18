@@ -9,13 +9,17 @@ contract ShareTokenRegistry is Ownable, Modifiers, IShareTokenRegistry {
     mapping(address => bool) public isTradeable;
     mapping(address => address) public zone;
 
-    constructor(address newOwner) Ownable(msg.sender) {
+    address[] public shareTokens;
+
+    constructor(address newOwner, RoleRegistry _roles) Ownable(msg.sender) Modifiers() {
         _transferOwnership(newOwner);
+        _setRoleRegistry(_roles);
     }
 
     function registerShareToken(address shareToken) external onlyRegistryUpdater {
         if (isShareToken[shareToken]) revert AlreadyRegistered();
         isShareToken[shareToken] = true;
+        shareTokens.push(shareToken);
     }
 
     function unregisterShareToken(address shareToken) external onlyRegistryUpdater {
@@ -34,8 +38,11 @@ contract ShareTokenRegistry is Ownable, Modifiers, IShareTokenRegistry {
         zone[shareToken] = zoneAddress;
     }
 
-    function setRoleRegistry(address roleRegistry) external onlyCouncilMember {
-        require(address(roles) == address(0), 'ROLES_REGISTRY != ZERO_ADDRESS');
-        _setRoleRegistry(RoleRegistry(roleRegistry));
+    function allShareTokens() external view returns (address[] memory) {
+        return shareTokens;
+    }
+
+    function allShareTokensLength() external view returns (uint256) {
+        return shareTokens.length;
     }
 }

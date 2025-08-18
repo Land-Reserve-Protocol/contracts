@@ -9,14 +9,14 @@ bytes32 constant REGISTRY_UPDATER_ROLE = keccak256('REGISTRY_UPDATER');
 // Other roles (may change)
 bytes32 constant METADATA_UPDATER_ROLE_PREFIX = keccak256('METADATA_UPDATER_PREFIX');
 // Math
-uint24 constant BASE_NON_NATIVE_UNIT = 10000;
+uint64 constant BASE_NON_NATIVE_UNIT = 10000;
 uint256 constant BASE_DECIMALS = 18;
 // Category multiplier deltas
-uint24 constant RESIDENTIAL = 0; // 0.0
-uint24 constant COMMERCIAL = 4000; // 0.4
-uint24 constant INDUSTRIAL = 6000; //0.6 (until changes are requested)
-uint24 constant AGRICULTURAL = 1000; // 0.1
+uint64 constant RESIDENTIAL = 0; // 0.0
+uint64 constant COMMERCIAL = 4000; // 0.4
+uint64 constant INDUSTRIAL = 6000; //0.6 (until changes are requested)
+uint64 constant AGRICULTURAL = 1000; // 0.1
 // Other constants
-uint24 constant SENTIMENT_SENSITIVITY_COEFFICIENT = 3000; // 0.3 in basis points
-uint24 constant ZER0 = 0;
+uint64 constant SENTIMENT_SENSITIVITY_COEFFICIENT = 3000; // 0.3 in basis points
+uint64 constant ZERO = 0;
 uint256 constant DEFAULT_UPDATE_INTERVAL = 14400; // 4 hours in seconds

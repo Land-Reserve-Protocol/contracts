@@ -14,7 +14,7 @@ import './registries/RoleRegistry.sol';
 /// @title Zone
 /// @author Kingsley Victor
 /// @notice The contract representing a geographical zone
-contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
+contract Zone is IZone, ERC721URIStorage, Pausable, ReentrancyGuard {
     // Share token implementation
     address public lrShareImplementation;
 
@@ -27,8 +27,8 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
     // Zone metadata
     string private _name;
     string private _symbol;
-    uint24 private longitude;
-    uint24 private latitude;
+    uint64 private longitude;
+    uint64 private latitude;
 
     // Asset metadata storage
     AssetMetadataStorage public assetMetadataStorage;
@@ -37,20 +37,18 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
     mapping(uint256 => address) public shareToken;
 
     // Number of trades per trade index
-    uint24[] public trades;
+    uint64[] public trades;
 
     // Share token registry
     IShareTokenRegistry public shareTokenRegistry;
 
-    constructor() ERC721('', '') Modifiers() {}
+    constructor() ERC721('', '') {}
 
     function initialize(
         string memory name_,
         string memory symbol_,
-        uint24 _latitude,
-        uint24 _longitude,
-        address roleRegistry,
-        address storageAdmin,
+        uint64 _latitude,
+        uint64 _longitude,
         address _lrShareImplementation,
         IShareTokenRegistry _shareTokenRegistry
     ) external {
@@ -62,13 +60,13 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
         _symbol = symbol_;
         shareTokenRegistry = _shareTokenRegistry;
 
-        assetMetadataStorage = new AssetMetadataStorage(RoleRegistry(roleRegistry), storageAdmin);
+        assetMetadataStorage = new AssetMetadataStorage();
         lrShareImplementation = _lrShareImplementation;
-        _setRoleRegistry(RoleRegistry(roleRegistry));
-        emit Initialize(name_, symbol_, _latitude, _longitude, storageAdmin);
+        trades.push(0);
+        emit Initialize(name_, symbol_, _latitude, _longitude);
     }
 
-    function metadata() external view override returns (uint24 lng, uint24 lat, uint256 id) {
+    function metadata() external view override returns (uint64 lng, uint64 lat, uint256 id) {
         lng = longitude;
         lat = latitude;
         id = tokenId;
@@ -79,7 +77,7 @@ contract Zone is IZone, ERC721URIStorage, Modifiers, Pausable, ReentrancyGuard {
         uint256 appraisal,
         string memory metadataURI,
         address peggedAsset,
-        uint24[4] memory factorWeights,
+        uint64[4] memory factorWeights,
         uint8 assetType
     ) external whenNotPaused nonReentrant returns (uint256, address) {
         if (msg.sender != factory) revert OnlyFactory();
