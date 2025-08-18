@@ -4,7 +4,7 @@ import {ERC20} from '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 
 contract TestERC20 is ERC20 {
     constructor() ERC20('Test USDT', 'TUSDT') {
-        _mint(msg.sender, 10000000000000);
+        _mint(msg.sender, 100000000000 * 10 ** decimals()); // Mint 100 billion tokens
     }
 
     function decimals() public view virtual override returns (uint8) {

@@ -66,10 +66,8 @@ contract Zone is IZone, ERC721URIStorage, Pausable, ReentrancyGuard {
         emit Initialize(name_, symbol_, _latitude, _longitude);
     }
 
-    function metadata() external view override returns (uint64 lng, uint64 lat, uint256 id) {
-        lng = longitude;
-        lat = latitude;
-        id = tokenId;
+    function metadata() external view override returns (uint64, uint64, uint256, string memory, string memory) {
+        return (latitude, longitude, tokenId, _name, _symbol);
     }
 
     function mint(

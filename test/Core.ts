@@ -59,7 +59,7 @@ describe('Core', () => {
       await actions.mintWithinZone(
         zones[0],
         signer1.address,
-        parseEther('1000'),
+        parseEther('1000000000'),
         'https://example.com/metadata',
         await usdt.getAddress(),
         [2500, 2500, 2500, 2500],
@@ -86,17 +86,20 @@ describe('Core', () => {
     it('should allow order creation [buy]', async () => {
       const assets = await shareTokenRegistry.allShareTokens();
       const marketplaceAddress = await marketplace.getAddress();
-      // Approve to spend 100 USDT
-      await usdt.approve(marketplaceAddress, parseUnits('0.05', 6));
-      await expect(marketplace.createOrder(assets[0], 0, 500, parseUnits('1', 6))).to.emit(marketplace, 'OrderCreated');
+      // Approve to spend 500000 USDT
+      await usdt.approve(marketplaceAddress, parseUnits('500000', 6));
+      await expect(marketplace.createOrder(assets[0], 0, 5000000000, parseUnits('1', 6))).to.emit(
+        marketplace,
+        'OrderCreated',
+      );
     });
     it('should allow order fulfillment [buy]', async () => {
       const orders = await marketplace.allOrders();
       const assets = await shareTokenRegistry.allShareTokens();
       const order = await getContractAtAddress<Order>('Order', orders[0]);
       const asset = await getContractAtAddress<LRShare>('LRShare', assets[0]);
-      // Approve order contract to spend 100 shares
-      await asset.connect(signer1).approve(orders[0], parseEther('0.05'));
+      // Approve order contract to spend 500000 shares
+      await asset.connect(signer1).approve(orders[0], parseEther('500000'));
       await order.connect(signer1).fulfill();
       // Get status of the order
       const status = await marketplace.status(orders[0]);
@@ -106,15 +109,18 @@ describe('Core', () => {
       const assets = await shareTokenRegistry.allShareTokens();
       const marketplaceAddress = await marketplace.getAddress();
       const asset = await getContractAtAddress<LRShare>('LRShare', assets[0]);
-      // Approve to spend 100 shares
-      await asset.approve(marketplaceAddress, parseEther('0.05'));
-      await expect(marketplace.createOrder(assets[0], 1, 500, parseUnits('1', 6))).to.emit(marketplace, 'OrderCreated');
+      // Approve to spend 100000 shares
+      await asset.approve(marketplaceAddress, parseEther('100000'));
+      await expect(marketplace.createOrder(assets[0], 1, 1000000000, parseUnits('1', 6))).to.emit(
+        marketplace,
+        'OrderCreated',
+      );
     });
     it('should allow order fulfillment [sell]', async () => {
       const orders = await marketplace.allOrders();
       const order = await getContractAtAddress<Order>('Order', orders[1]);
-      // Approve order contract to spend 100 USDT
-      await usdt.connect(signer1).approve(orders[1], parseUnits('0.05', 6));
+      // Approve order contract to spend 100000 USDT
+      await usdt.connect(signer1).approve(orders[1], parseUnits('100000', 6));
       await order.connect(signer1).fulfill();
       // Get status of the order
       const status = await marketplace.status(orders[1]);

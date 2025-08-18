@@ -7,7 +7,7 @@ interface IZone {
     error OnlyFactory();
 
     function tokenId() external view returns (uint256);
-    function metadata() external view returns (uint64, uint64, uint256);
+    function metadata() external view returns (uint64, uint64, uint256, string memory, string memory);
     function factory() external view returns (address);
     function shareToken(uint256) external view returns (address);
     function marketplace() external view returns (address);
