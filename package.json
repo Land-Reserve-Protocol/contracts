@@ -28,7 +28,7 @@
     "format": "prettier --write .",
     "lint:fix": "solhint --fix 'contracts/**/*.sol'",
     "compile": "npx hardhat compile",
-    "clean": "rm -rf artifacts",
+    "clean": "rm -rf artifacts cache",
     "build": "pnpm run clean && pnpm run compile",
     "test": "npx hardhat test test/Core.ts --network hardhat"
   }

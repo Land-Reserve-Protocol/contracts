@@ -11,7 +11,7 @@ interface IOrder {
     function initialize(
         OrderType orderType,
         uint256 unitAmount,
-        uint24 volume,
+        uint64 volume,
         address account,
         address shareToken
     ) external;

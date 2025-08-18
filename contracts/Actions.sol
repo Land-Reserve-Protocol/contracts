@@ -40,8 +40,8 @@ contract Actions is Modifiers, Pausable, ReentrancyGuard, ERC721Holder, IActions
     function deployZone(
         string memory name,
         string memory symbol,
-        uint24 lat,
-        uint24 lng
+        uint64 lat,
+        uint64 lng
     ) external onlyCouncilMember whenNotPaused nonReentrant returns (address zone) {
         bytes32 salt = keccak256(abi.encodePacked(name, symbol, lat, lng));
         zone = Clones.cloneDeterministic(zoneImplementation, salt);
@@ -57,7 +57,7 @@ contract Actions is Modifiers, Pausable, ReentrancyGuard, ERC721Holder, IActions
         uint256 totalShares,
         string memory tokenURI,
         address peggedAsset,
-        uint24[4] memory factorWeights,
+        uint64[4] memory factorWeights,
         uint8 assetType
     ) external onlyCouncilMember whenNotPaused nonReentrant {
         if (!IZoneRegistry(zoneRegistry).isZone(zone)) revert UnknownZone();

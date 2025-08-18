@@ -12,7 +12,7 @@ contract Order is IOrder {
 
     OrderType public orderType;
     uint256 public unitAmount;
-    uint24 public volume;
+    uint64 public volume;
     address public account;
     address public factory;
     address public shareToken;
@@ -21,7 +21,7 @@ contract Order is IOrder {
     function initialize(
         OrderType _orderType,
         uint256 _unitAmount,
-        uint24 _volume,
+        uint64 _volume,
         address _account,
         address _shareToken
     ) external {

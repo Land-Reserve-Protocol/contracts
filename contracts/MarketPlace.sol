@@ -33,7 +33,7 @@ contract MarketPlace is Modifiers, IMarketplace, ReentrancyGuard, Pausable {
     function createOrder(
         address shareToken,
         uint8 orderType,
-        uint24 volume,
+        uint64 volume,
         uint256 unitAmount
     ) external whenNotPaused nonReentrant returns (address orderId) {
         if (!IShareTokenRegistry(shareTokenRegistry).isShareToken(shareToken)) revert UnknownShareToken();
@@ -77,5 +77,9 @@ contract MarketPlace is Modifiers, IMarketplace, ReentrancyGuard, Pausable {
 
     function ordersLength() external view returns (uint256) {
         return orders.length;
+    }
+
+    function allOrders() external view returns (address[] memory) {
+        return orders;
     }
 }

@@ -2,7 +2,9 @@ import { type HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signer
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import type {
   Actions,
+  LRShare,
   MarketPlace,
+  Order,
   RoleRegistry,
   ShareTokenRegistry,
   TestERC20,
@@ -13,7 +15,7 @@ import { localConstants, setupFixtures } from './helpers';
 import { COUNCIL_MEMBER_ROLE, REGISTRY_UPDATER_ROLE } from '../scripts/constants';
 import { expect } from 'chai';
 import { getContractAtAddress } from '../scripts/helpers';
-import { parseEther } from 'ethers';
+import { parseEther, parseUnits } from 'ethers';
 
 let marketplace: MarketPlace;
 let actions: Actions;
@@ -61,7 +63,7 @@ describe('Core', () => {
         'https://example.com/metadata',
         await usdt.getAddress(),
         [2500, 2500, 2500, 2500],
-        1,
+        0,
       );
       const zone = await getContractAtAddress<Zone>('Zone', zones[0]);
       expect(await zone.tokenId()).to.equal(1);
@@ -78,6 +80,57 @@ describe('Core', () => {
           1,
         ),
       ).to.be.revertedWithCustomError(actions, 'UnknownZone');
+    });
+  });
+  describe('Marketplace', () => {
+    it('should allow order creation [buy]', async () => {
+      const assets = await shareTokenRegistry.allShareTokens();
+      const marketplaceAddress = await marketplace.getAddress();
+      // Approve to spend 100 USDT
+      await usdt.approve(marketplaceAddress, parseUnits('0.05', 6));
+      await expect(marketplace.createOrder(assets[0], 0, 500, parseUnits('1', 6))).to.emit(marketplace, 'OrderCreated');
+    });
+    it('should allow order fulfillment [buy]', async () => {
+      const orders = await marketplace.allOrders();
+      const assets = await shareTokenRegistry.allShareTokens();
+      const order = await getContractAtAddress<Order>('Order', orders[0]);
+      const asset = await getContractAtAddress<LRShare>('LRShare', assets[0]);
+      const delta = await asset.categoryMultiplierDelta();
+      console.log('Category Multiplier Delta:', delta);
+      const observation0 = await asset.observations(0);
+      console.log('Observation:', observation0);
+      // Approve order contract to spend 100 shares
+      await asset.connect(signer1).approve(orders[0], parseEther('0.05'));
+      await order.connect(signer1).fulfill();
+      // Get status of the order
+      const status = await marketplace.status(orders[0]);
+      const observation1 = await asset.observations(0);
+      console.log('Observation:', observation1);
+      expect(status).to.equal(1n); // 1 means Fulfilled
+    });
+    it('should allow order creation [sell]', async () => {
+      const assets = await shareTokenRegistry.allShareTokens();
+      const marketplaceAddress = await marketplace.getAddress();
+      const asset = await getContractAtAddress<LRShare>('LRShare', assets[0]);
+      // Approve to spend 100 shares
+      await asset.approve(marketplaceAddress, parseEther('0.05'));
+      await expect(marketplace.createOrder(assets[0], 1, 500, parseUnits('1', 6))).to.emit(marketplace, 'OrderCreated');
+    });
+    it('should allow order fulfillment [sell]', async () => {
+      const orders = await marketplace.allOrders();
+      const assets = await shareTokenRegistry.allShareTokens();
+      const order = await getContractAtAddress<Order>('Order', orders[1]);
+      const asset = await getContractAtAddress<LRShare>('LRShare', assets[0]);
+      const observation0 = await asset.observations(0);
+      console.log('Observation:', observation0);
+      // Approve order contract to spend 100 USDT
+      await usdt.connect(signer1).approve(orders[1], parseUnits('0.05', 6));
+      await order.connect(signer1).fulfill();
+      // Get status of the order
+      const status = await marketplace.status(orders[1]);
+      const observation1 = await asset.observations(0);
+      console.log('Observation:', observation1);
+      expect(status).to.equal(1n); // 1 means Fulfilled
     });
   });
 });
