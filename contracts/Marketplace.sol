@@ -13,7 +13,7 @@ import './utils/Modifiers.sol';
 import './registries/RoleRegistry.sol';
 import './libs/Constants.sol' as Constants;
 
-contract MarketPlace is Modifiers, IMarketplace, ReentrancyGuard, Pausable {
+contract Marketplace is Modifiers, IMarketplace, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     address public immutable orderImplementation;

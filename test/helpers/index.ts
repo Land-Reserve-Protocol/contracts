@@ -2,7 +2,7 @@ import { ethers } from 'hardhat';
 import {
   Actions,
   LRShare,
-  MarketPlace,
+  Marketplace,
   Order,
   RoleRegistry,
   ShareTokenRegistry,
@@ -30,8 +30,8 @@ export async function setupFixtures() {
   const zone = await deployContract<Zone>('Zone');
   const lrShare = await deployContract<LRShare>('LRShare');
   const order = await deployContract<Order>('Order');
-  const marketplace = await deployContract<MarketPlace>(
-    'MarketPlace',
+  const marketplace = await deployContract<Marketplace>(
+    'Marketplace',
     undefined,
     await order.getAddress(),
     await roleRegistry.getAddress(),
