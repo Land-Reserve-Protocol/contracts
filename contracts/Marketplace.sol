@@ -13,7 +13,7 @@ import './utils/Modifiers.sol';
 import './registries/RoleRegistry.sol';
 import './libs/Constants.sol' as Constants;
 
-contract MarketPlace is Modifiers, IMarketplace, ReentrancyGuard, Pausable {
+contract Marketplace is Modifiers, IMarketplace, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     address public immutable orderImplementation;
@@ -64,12 +64,14 @@ contract MarketPlace is Modifiers, IMarketplace, ReentrancyGuard, Pausable {
         require(_isOrder[msg.sender], 'INVALID_CALLER');
         require(status[msg.sender] == OrderStatus.PENDING, 'ORDER_NOT_PENDING');
         status[msg.sender] = OrderStatus.FULFILLED;
+        emit OrderFulfilled(msg.sender);
     }
 
     function cancelOrder() external {
         require(_isOrder[msg.sender], 'INVALID_CALLER');
         require(status[msg.sender] == OrderStatus.PENDING, 'ORDER_NOT_PENDING');
         status[msg.sender] = OrderStatus.CANCELLED;
+        emit OrderCancelled(msg.sender);
     }
 
     function switchPauseState() external onlyCouncilMember {

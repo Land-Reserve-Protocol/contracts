@@ -74,6 +74,8 @@ contract LRShare is ERC20, ILRShare {
         });
         observations.push(initialObservation);
         lastObservationUpdateTime = block.timestamp;
+
+        emit Initialize(_assetId, _peggedAsset, _factorWeights, assetType, categoryMultiplierDelta);
     }
 
     function _findPrice(

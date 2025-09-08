@@ -14,6 +14,7 @@
     "@types/mocha": ">=9.1.0",
     "@types/node": ">=18.0.0",
     "chai": "^4.2.0",
+    "dotenv": "^17.2.2",
     "ethers": "^6.4.0",
     "hardhat": "^2.25.0",
     "hardhat-gas-reporter": "^2.3.0",
@@ -30,6 +31,8 @@
     "compile": "npx hardhat compile",
     "clean": "rm -rf artifacts cache",
     "build": "pnpm run clean && pnpm run compile",
-    "test": "npx hardhat test test/Core.ts --network hardhat"
+    "test": "npx hardhat test test/Core.ts --network hardhat",
+    "deploy": "npx hardhat run scripts/deployment/DeployCore.ts",
+    "extract-abis": "npx hardhat run scripts/ExtractABIs.ts"
   }
 }

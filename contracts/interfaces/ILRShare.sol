@@ -44,4 +44,12 @@ interface ILRShare {
         );
     function observationsLength() external view returns (uint256);
     function lastObservationUpdateTime() external view returns (uint256);
+
+    event Initialize(
+        uint256 indexed tokenId,
+        address indexed peggedAsset,
+        uint64[4] factorWeights,
+        AssetType assetType,
+        uint64 cMultiplierDelta
+    );
 }

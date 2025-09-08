@@ -3,7 +3,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import type {
   Actions,
   LRShare,
-  MarketPlace,
+  Marketplace,
   Order,
   RoleRegistry,
   ShareTokenRegistry,
@@ -17,7 +17,7 @@ import { expect } from 'chai';
 import { getContractAtAddress } from '../scripts/helpers';
 import { parseEther, parseUnits } from 'ethers';
 
-let marketplace: MarketPlace;
+let marketplace: Marketplace;
 let actions: Actions;
 let shareTokenRegistry: ShareTokenRegistry;
 let roleRegistry: RoleRegistry;
