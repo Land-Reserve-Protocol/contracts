@@ -64,12 +64,14 @@ contract Marketplace is Modifiers, IMarketplace, ReentrancyGuard, Pausable {
         require(_isOrder[msg.sender], 'INVALID_CALLER');
         require(status[msg.sender] == OrderStatus.PENDING, 'ORDER_NOT_PENDING');
         status[msg.sender] = OrderStatus.FULFILLED;
+        emit OrderFulfilled(msg.sender);
     }
 
     function cancelOrder() external {
         require(_isOrder[msg.sender], 'INVALID_CALLER');
         require(status[msg.sender] == OrderStatus.PENDING, 'ORDER_NOT_PENDING');
         status[msg.sender] = OrderStatus.CANCELLED;
+        emit OrderCancelled(msg.sender);
     }
 
     function switchPauseState() external onlyCouncilMember {

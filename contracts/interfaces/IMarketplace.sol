@@ -32,4 +32,6 @@ interface IMarketplace {
         address indexed shareToken,
         uint256 unitAmount
     );
+    event OrderFulfilled(address indexed orderId);
+    event OrderCancelled(address indexed orderId);
 }
