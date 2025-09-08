@@ -32,6 +32,7 @@
     "clean": "rm -rf artifacts cache",
     "build": "pnpm run clean && pnpm run compile",
     "test": "npx hardhat test test/Core.ts --network hardhat",
-    "deploy": "npx hardhat run scripts/deployment/DeployCore.ts"
+    "deploy": "npx hardhat run scripts/deployment/DeployCore.ts",
+    "extract-abis": "npx hardhat run scripts/ExtractABIs.ts"
   }
 }
