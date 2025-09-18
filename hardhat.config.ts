@@ -19,6 +19,14 @@ const config: HardhatUserConfig = {
       gas: 'auto',
       gasMultiplier: 1,
     },
+    megaETHTestnet: {
+      url: 'https://carrot.megaeth.com/rpc',
+      chainId: 6342,
+      accounts: [process.env.PRIVATE_KEY as string],
+      gasPrice: 'auto',
+      gas: 'auto',
+      gasMultiplier: 1,
+    },
   },
 };
 
