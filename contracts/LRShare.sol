@@ -2,6 +2,7 @@ pragma solidity ^0.8.0;
 
 import {ERC20} from '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import {IERC721Metadata} from '@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol';
+import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 import './interfaces/ILRShare.sol';
 import './interfaces/IZone.sol';
 import './interfaces/IMarketplace.sol';
@@ -51,8 +52,8 @@ contract LRShare is ERC20, ILRShare {
         else if (assetType == AssetType.Agricultural) categoryMultiplierDelta = Constants.AGRICULTURAL;
         else revert('INVALID_ASSET_TYPE');
 
-        _name = string(abi.encodePacked(IERC721Metadata(zone).name(), '-', _assetId));
-        _symbol = string(abi.encodePacked(IERC721Metadata(zone).symbol(), '-', _assetId));
+        _name = string(abi.encodePacked(IERC721Metadata(zone).name(), '-', Strings.toString(_assetId)));
+        _symbol = string(abi.encodePacked(IERC721Metadata(zone).symbol(), '-', Strings.toString(_assetId)));
 
         // Pegged asset
         ERC20 asset = ERC20(peggedAsset);
