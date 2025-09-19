@@ -1,5 +1,7 @@
 import { HardhatUserConfig } from 'hardhat/config';
 import '@nomicfoundation/hardhat-toolbox';
+import '@nomicfoundation/hardhat-verify';
+import '@xyrusworx/hardhat-solidity-json';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -27,6 +29,21 @@ const config: HardhatUserConfig = {
       gas: 'auto',
       gasMultiplier: 1,
     },
+  },
+  etherscan: {
+    apiKey: {
+      fluentTestnet: 'empty',
+    },
+    customChains: [
+      {
+        network: 'fluentTestnet',
+        chainId: 20994,
+        urls: {
+          apiURL: 'https://testnet.fluentscan.xyz/api',
+          browserURL: 'https://testnet.fluentscan.xyz',
+        },
+      },
+    ],
   },
 };
 

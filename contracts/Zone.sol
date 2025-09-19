@@ -132,4 +132,17 @@ contract Zone is IZone, ERC721URIStorage, Pausable, ReentrancyGuard {
         if (msg.sender != factory) revert OnlyFactory();
         marketplace = _marketplace;
     }
+
+    /*
+    @dev OZ inheritance overrides
+    These are needed as _name and _symbol are set privately before
+    logic is executed within the constructor to set _name and _symbol.
+    */
+    function name() public view override returns (string memory) {
+        return _name;
+    }
+
+    function symbol() public view override returns (string memory) {
+        return _symbol;
+    }
 }

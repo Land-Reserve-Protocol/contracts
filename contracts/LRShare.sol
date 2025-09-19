@@ -203,4 +203,17 @@ contract LRShare is ERC20, ILRShare {
     function observationsLength() external view override returns (uint256) {
         return observations.length;
     }
+
+    /*
+    @dev OZ inheritance overrides
+    These are needed as _name and _symbol are set privately before
+    logic is executed within the constructor to set _name and _symbol.
+    */
+    function name() public view override returns (string memory) {
+        return _name;
+    }
+
+    function symbol() public view override returns (string memory) {
+        return _symbol;
+    }
 }
