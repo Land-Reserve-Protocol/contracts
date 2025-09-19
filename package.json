@@ -13,6 +13,7 @@
     "@types/chai": "^4.2.0",
     "@types/mocha": ">=9.1.0",
     "@types/node": ">=18.0.0",
+    "@xyrusworx/hardhat-solidity-json": "^1.0.2",
     "chai": "^4.2.0",
     "dotenv": "^17.2.2",
     "ethers": "^6.4.0",
@@ -30,9 +31,10 @@
     "lint:fix": "solhint --fix 'contracts/**/*.sol'",
     "compile": "npx hardhat compile",
     "clean": "rm -rf artifacts cache",
-    "build": "pnpm run clean && pnpm run compile",
+    "build": "pnpm run clean && pnpm run compile && pnpm run jsonify",
     "test": "npx hardhat test test/Core.ts --network hardhat",
     "deploy": "npx hardhat run scripts/deployment/DeployCore.ts",
-    "extract-abis": "npx hardhat run scripts/ExtractABIs.ts"
+    "extract-abis": "npx hardhat run scripts/ExtractABIs.ts",
+    "jsonify": "npx hardhat solidity-json"
   }
 }

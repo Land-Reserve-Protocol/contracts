@@ -46,6 +46,9 @@ importers:
       '@types/node':
         specifier: '>=18.0.0'
         version: 24.0.4
+      '@xyrusworx/hardhat-solidity-json':
+        specifier: ^1.0.2
+        version: 1.0.2(hardhat@2.25.0(ts-node@10.9.2(@types/node@24.0.4)(typescript@5.8.3))(typescript@5.8.3))
       chai:
         specifier: ^4.2.0
         version: 4.5.0
@@ -614,6 +617,12 @@ packages:
   '@types/secp256k1@4.0.6':
     resolution:
       { integrity: sha512-hHxJU6PAEUn0TP4S/ZOzuTUvJWuZ6eIKeNKb5RBpODvSl6hp1Wrw4s7ATY50rklRCScUDpHzVA/DQdSjJ3UoYQ== }
+
+  '@xyrusworx/hardhat-solidity-json@1.0.2':
+    resolution:
+      { integrity: sha512-cr00OHv6CMl/e9XzYu+8/78zjUgEX+g+Z1v67PASosaqmnMVS6d4+jebhgKoWt/vmXfhC06NeKOlsUKNZsGKhQ== }
+    peerDependencies:
+      hardhat: ^2.9.0
 
   abbrev@1.0.9:
     resolution:
@@ -3195,6 +3204,10 @@ snapshots:
   '@types/secp256k1@4.0.6':
     dependencies:
       '@types/node': 24.0.4
+
+  '@xyrusworx/hardhat-solidity-json@1.0.2(hardhat@2.25.0(ts-node@10.9.2(@types/node@24.0.4)(typescript@5.8.3))(typescript@5.8.3))':
+    dependencies:
+      hardhat: 2.25.0(ts-node@10.9.2(@types/node@24.0.4)(typescript@5.8.3))(typescript@5.8.3)
 
   abbrev@1.0.9: {}
 
